@@ -75,8 +75,9 @@ function onMouseDown(e) {
   e.preventDefault();
   e.stopPropagation();
   
-  startX = e.clientX;
-  startY = e.clientY;
+  // Use pageX/pageY to account for scroll position
+  startX = e.pageX;
+  startY = e.pageY;
   
   // Create selection rectangle
   const selectionRect = document.createElement('div');
@@ -98,16 +99,21 @@ function onMouseMove(e) {
   const selectionRect = document.getElementById('gemini-selection-rect');
   if (!selectionRect) return;
   
-  endX = e.clientX;
-  endY = e.clientY;
+  // Use pageX/pageY for consistency
+  endX = e.pageX;
+  endY = e.pageY;
   
   const left = Math.min(startX, endX);
   const top = Math.min(startY, endY);
   const width = Math.abs(endX - startX);
   const height = Math.abs(endY - startY);
   
-  selectionRect.style.left = left + 'px';
-  selectionRect.style.top = top + 'px';
+  // Convert page coordinates to viewport coordinates for display
+  const viewportLeft = left - window.pageXOffset;
+  const viewportTop = top - window.pageYOffset;
+  
+  selectionRect.style.left = viewportLeft + 'px';
+  selectionRect.style.top = viewportTop + 'px';
   selectionRect.style.width = width + 'px';
   selectionRect.style.height = height + 'px';
 }
@@ -118,8 +124,9 @@ function onMouseUp(e) {
   e.preventDefault();
   e.stopPropagation();
   
-  endX = e.clientX;
-  endY = e.clientY;
+  // Use pageX/pageY for consistency
+  endX = e.pageX;
+  endY = e.pageY;
   
   const left = Math.min(startX, endX);
   const top = Math.min(startY, endY);
@@ -127,7 +134,10 @@ function onMouseUp(e) {
   const height = Math.abs(endY - startY);
   
   if (width > 10 && height > 10) {
-    captureSelectedArea(left, top, width, height);
+    // Convert page coordinates to viewport coordinates for capture
+    const viewportLeft = left - window.pageXOffset;
+    const viewportTop = top - window.pageYOffset;
+    captureSelectedArea(viewportLeft, viewportTop, width, height);
   }
   
   endCapture();
@@ -156,10 +166,27 @@ function endCapture() {
 }
 
 function captureSelectedArea(left, top, width, height) {
+  // Account for device pixel ratio
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  const captureArea = {
+    left: Math.round(left * pixelRatio),
+    top: Math.round(top * pixelRatio),
+    width: Math.round(width * pixelRatio),
+    height: Math.round(height * pixelRatio)
+  };
+  
+  console.log('Capture area (viewport coords):', {left, top, width, height});
+  console.log('Capture area (device pixels):', captureArea);
+  console.log('Device pixel ratio:', pixelRatio);
+  console.log('Window scroll:', {x: window.pageXOffset, y: window.pageYOffset});
+  
   // Use Chrome's built-in capture API
   chrome.runtime.sendMessage({
     action: 'captureVisibleTab',
-    area: {left, top, width, height},
+    area: captureArea,
+    originalArea: {left, top, width, height}, // Keep original for debugging
+    pixelRatio: pixelRatio,
     apiKey: apiKey,
     targetLanguage: targetLanguage,
     geminiModel: geminiModel

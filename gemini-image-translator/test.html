@@ -78,7 +78,12 @@
             Test Extension Communication
         </button>
         
+        <button onclick="showCoordinates()" style="padding: 10px 20px; margin: 10px 0; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Show Mouse Coordinates
+        </button>
+        
         <div id="testResults" style="margin-top: 10px;"></div>
+        <div id="coordinates" style="margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
     </div>
     
     <script>
@@ -125,6 +130,43 @@
             } else {
                 results.innerHTML = '<div style="color: red;">Chrome extension API not available</div>';
             }
+        }
+        
+        let coordinateTracking = false;
+        
+        function showCoordinates() {
+            coordinateTracking = !coordinateTracking;
+            const button = event.target;
+            const coordDiv = document.getElementById('coordinates');
+            
+            if (coordinateTracking) {
+                button.textContent = 'Hide Mouse Coordinates';
+                button.style.background = '#f44336';
+                
+                document.addEventListener('mousemove', trackMouse);
+                coordDiv.innerHTML = 'Move your mouse around to see coordinates...';
+            } else {
+                button.textContent = 'Show Mouse Coordinates';
+                button.style.background = '#2196F3';
+                
+                document.removeEventListener('mousemove', trackMouse);
+                coordDiv.innerHTML = '';
+            }
+        }
+        
+        function trackMouse(e) {
+            const coordDiv = document.getElementById('coordinates');
+            const pixelRatio = window.devicePixelRatio || 1;
+            
+            coordDiv.innerHTML = `
+                <div>Client X/Y: ${e.clientX}, ${e.clientY}</div>
+                <div>Page X/Y: ${e.pageX}, ${e.pageY}</div>
+                <div>Screen X/Y: ${e.screenX}, ${e.screenY}</div>
+                <div>Scroll X/Y: ${window.pageXOffset}, ${window.pageYOffset}</div>
+                <div>Device Pixel Ratio: ${pixelRatio}</div>
+                <div>Viewport Size: ${window.innerWidth} x ${window.innerHeight}</div>
+                <div>Document Size: ${document.documentElement.scrollWidth} x ${document.documentElement.scrollHeight}</div>
+            `;
         }
     </script>
 </body>

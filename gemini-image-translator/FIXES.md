@@ -21,13 +21,24 @@
 - Fixed OffscreenCanvas usage in service worker context
 - Added comprehensive error messages for API failures
 
-### 3. Added Gemini Model Selection
+### 3. Pixel Offset Issue (MAJOR FIX)
+**Problem:** Captured image was offset by several hundred pixels from selected area
+**Root Cause:** Using clientX/clientY instead of pageX/pageY, not accounting for scroll position and device pixel ratio
+**Fixes Applied:**
+- Changed mouse event handling to use pageX/pageY instead of clientX/clientY
+- Added proper scroll position compensation (window.pageXOffset, window.pageYOffset)
+- Account for device pixel ratio in capture coordinates
+- Convert page coordinates to viewport coordinates for display
+- Added detailed logging for debugging coordinate calculations
+- Fixed coordinate system consistency throughout the capture flow
+
+### 4. Added Gemini Model Selection
 **New Feature:** Users can now choose between different Gemini models
 **Implementation:**
-- Added model dropdown in popup.html (Flash, Pro, Pro Vision)
+- Added model dropdown in popup.html (1.5 Flash, 1.5 Pro, 2.0 Flash Experimental, Pro Vision)
 - Updated popup.js to save/load model preference
 - Modified API calls to use selected model
-- Default to gemini-1.5-flash for speed and free tier compatibility
+- Default to gemini-1.5-flash for stability and free tier compatibility
 
 ## Technical Improvements
 
@@ -111,6 +122,12 @@
 - Open test.html
 - Click "Test Extension Communication" button
 - Should show "Extension communication successful!"
+
+### Debug Coordinates (NEW)
+- Open test.html
+- Click "Show Mouse Coordinates" to see real-time coordinate tracking
+- Verify pageX/pageY vs clientX/clientY differences
+- Check device pixel ratio and scroll position effects
 
 ## Model Recommendations
 

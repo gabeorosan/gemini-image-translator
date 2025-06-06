@@ -40,7 +40,12 @@ async function handleImageTranslation(request, sendResponse) {
 
 async function handleTabCapture(request, sendResponse) {
   try {
-    const { area, apiKey, targetLanguage, geminiModel } = request;
+    const { area, originalArea, pixelRatio, apiKey, targetLanguage, geminiModel } = request;
+    
+    console.log('Background: Received capture request');
+    console.log('Area:', area);
+    console.log('Original area:', originalArea);
+    console.log('Pixel ratio:', pixelRatio);
     
     // Get the current active tab
     chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
@@ -59,9 +64,13 @@ async function handleTabCapture(request, sendResponse) {
         }
         
         try {
+          console.log('Background: Captured tab, now cropping');
+          
           // Crop the image to the selected area
           const croppedImage = await cropImage(dataUrl, area);
           const base64Image = croppedImage.split(',')[1];
+          
+          console.log('Background: Image cropped successfully');
           
           // Call Gemini API
           const translation = await callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel || 'gemini-1.5-flash');
