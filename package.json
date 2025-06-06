@@ -1,0 +1,66 @@
+{
+  "name": "gemini-image-translator",
+  "version": "1.2.0",
+  "description": "A Chrome extension that uses Google's Gemini AI to translate text from images in real-time",
+  "main": "manifest.json",
+  "scripts": {
+    "build": "echo 'No build process required - vanilla JavaScript Chrome extension'",
+    "test": "echo 'Manual testing required - load extension in Chrome'",
+    "lint": "echo 'Add ESLint configuration for code linting'",
+    "package": "zip -r gemini-image-translator.zip . -x '*.git*' 'node_modules/*' '*.zip' 'docs/*' '.browser_screenshots/*' 'lost+found/*'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/gemini-image-translator.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "translation",
+    "gemini-ai",
+    "ocr",
+    "image-translation",
+    "ai",
+    "google-gemini",
+    "text-recognition",
+    "multilingual",
+    "screen-capture"
+  ],
+  "author": "Gemini Image Translator Contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/gemini-image-translator/issues"
+  },
+  "homepage": "https://github.com/yourusername/gemini-image-translator#readme",
+  "engines": {
+    "chrome": ">=88.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "extensionInfo": {
+    "manifestVersion": 3,
+    "chromeMinVersion": "88",
+    "permissions": [
+      "activeTab",
+      "storage",
+      "scripting",
+      "commands"
+    ],
+    "apis": [
+      "chrome.tabs",
+      "chrome.storage",
+      "chrome.scripting",
+      "chrome.commands",
+      "chrome.runtime"
+    ]
+  },
+  "geminiApi": {
+    "supportedModels": [
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
+      "gemini-1.5-pro",
+      "gemini-1.0-pro-vision"
+    ],
+    "defaultModel": "gemini-2.0-flash",
+    "apiEndpoint": "https://generativelanguage.googleapis.com/v1beta/models"
+  }
+}
