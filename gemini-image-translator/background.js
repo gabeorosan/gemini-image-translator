@@ -29,7 +29,7 @@ async function handleImageTranslation(request, sendResponse) {
     }
     
     // Call Gemini API
-    const translation = await callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel || 'gemini-2.5-flash-preview-05-20');
+    const translation = await callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel || 'gemini-2.0-flash');
     
     sendResponse({ success: true, translation: translation });
   } catch (error) {
@@ -73,7 +73,7 @@ async function handleTabCapture(request, sendResponse) {
           console.log('Background: Image cropped successfully');
           
           // Call Gemini API
-          const translation = await callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel || 'gemini-2.5-flash-preview-05-20');
+          const translation = await callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel || 'gemini-2.0-flash');
           
           // Send result back to content script
           chrome.tabs.sendMessage(tabId, {
@@ -131,7 +131,7 @@ async function cropImage(dataUrl, area) {
   });
 }
 
-async function callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel = 'gemini-2.5-flash-preview-05-20') {
+async function callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel = 'gemini-2.0-flash') {
   const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
   
   const requestBody = {
@@ -222,7 +222,7 @@ chrome.commands.onCommand.addListener((command) => {
             action: 'startCapture',
             apiKey: result.geminiApiKey,
             targetLanguage: result.targetLanguage || 'English',
-            geminiModel: result.geminiModel || 'gemini-2.5-flash-preview-05-20'
+            geminiModel: result.geminiModel || 'gemini-2.0-flash'
           });
         });
       }
