@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 350px;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin: 0;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .api-key-section {
+      margin-bottom: 20px;
+    }
+    
+    .api-key-section label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .api-key-section input {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    
+    .language-section {
+      margin-bottom: 20px;
+    }
+    
+    .language-section label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .language-section select {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+    }
+    
+    .btn-secondary {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #1976D2;
+    }
+    
+    .status {
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 10px;
+    }
+    
+    .instructions {
+      font-size: 11px;
+      opacity: 0.8;
+      line-height: 1.4;
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    .error {
+      color: #ffcdd2;
+      background: rgba(244, 67, 54, 0.2);
+    }
+    
+    .success {
+      color: #c8e6c9;
+      background: rgba(76, 175, 80, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🌐 Gemini Image Translator</h1>
+  </div>
+  
+  <div class="api-key-section">
+    <label for="apiKey">Gemini API Key:</label>
+    <input type="password" id="apiKey" placeholder="Enter your Gemini API key">
+  </div>
+  
+  <div class="language-section">
+    <label for="targetLanguage">Translate to:</label>
+    <select id="targetLanguage">
+      <option value="English">English</option>
+      <option value="Spanish">Spanish</option>
+      <option value="French">French</option>
+      <option value="German">German</option>
+      <option value="Italian">Italian</option>
+      <option value="Portuguese">Portuguese</option>
+      <option value="Russian">Russian</option>
+      <option value="Japanese">Japanese</option>
+      <option value="Korean">Korean</option>
+      <option value="Chinese">Chinese</option>
+      <option value="Arabic">Arabic</option>
+      <option value="Hindi">Hindi</option>
+    </select>
+  </div>
+  
+  <div class="buttons">
+    <button id="captureBtn" class="btn btn-primary">📷 Capture & Translate</button>
+    <button id="uploadBtn" class="btn btn-secondary">📁 Upload Image</button>
+  </div>
+  
+  <input type="file" id="fileInput" accept="image/*" style="display: none;">
+  
+  <div id="status" class="status">Ready to translate images</div>
+  
+  <div class="instructions">
+    <strong>How to use:</strong><br>
+    1. Enter your Gemini API key<br>
+    2. Select target language<br>
+    3. Click "Capture" to select area or "Upload" for image file<br>
+    4. View translation results
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
