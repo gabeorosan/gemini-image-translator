@@ -9,6 +9,15 @@
     "scripting",
     "tabs"
   ],
+  "commands": {
+    "capture-translate": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+T",
+        "mac": "Command+Shift+T"
+      },
+      "description": "Capture and translate selected area"
+    }
+  },
   "host_permissions": [
     "https://generativelanguage.googleapis.com/*"
   ],

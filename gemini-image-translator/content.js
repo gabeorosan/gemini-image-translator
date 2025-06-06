@@ -166,6 +166,9 @@ function endCapture() {
 }
 
 function captureSelectedArea(left, top, width, height) {
+  // Show loading indicator
+  showLoadingIndicator(left, top, width, height);
+  
   // Account for device pixel ratio
   const pixelRatio = window.devicePixelRatio || 1;
   
@@ -191,6 +194,9 @@ function captureSelectedArea(left, top, width, height) {
     targetLanguage: targetLanguage,
     geminiModel: geminiModel
   }, function(response) {
+    // Hide loading indicator
+    hideLoadingIndicator();
+    
     if (chrome.runtime.lastError) {
       showError('Capture failed: ' + chrome.runtime.lastError.message);
       return;
@@ -204,7 +210,62 @@ function captureSelectedArea(left, top, width, height) {
   });
 }
 
+function showLoadingIndicator(left, top, width, height) {
+  // Remove any existing loading indicator
+  hideLoadingIndicator();
+  
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.id = 'gemini-loading-indicator';
+  loadingOverlay.style.cssText = `
+    position: fixed;
+    top: ${top}px;
+    left: ${left}px;
+    width: ${width}px;
+    height: ${height}px;
+    background: rgba(66, 133, 244, 0.2);
+    border: 2px solid #4285f4;
+    border-radius: 4px;
+    z-index: 1000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+  `;
+  
+  loadingOverlay.innerHTML = `
+    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); text-align: center;">
+      <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #4285f4; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px;"></div>
+      <div style="color: #333; font-size: 14px; font-weight: 500;">Translating...</div>
+    </div>
+  `;
+  
+  // Add CSS animation for spinner
+  if (!document.getElementById('gemini-spinner-style')) {
+    const style = document.createElement('style');
+    style.id = 'gemini-spinner-style';
+    style.textContent = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  document.body.appendChild(loadingOverlay);
+}
+
+function hideLoadingIndicator() {
+  const loadingIndicator = document.getElementById('gemini-loading-indicator');
+  if (loadingIndicator) {
+    loadingIndicator.remove();
+  }
+}
+
 function showTranslationResult(translation, imageData) {
+  // Hide loading indicator
+  hideLoadingIndicator();
+  
   // Calculate position to the side of the captured area
   let resultX = window.innerWidth - 350; // Default to right side
   let resultY = 50; // Default top position
@@ -300,6 +361,9 @@ function showTranslationResult(translation, imageData) {
 }
 
 function showError(message) {
+  // Hide loading indicator if showing
+  hideLoadingIndicator();
+  
   const errorWindow = document.createElement('div');
   errorWindow.style.cssText = `
     position: fixed;

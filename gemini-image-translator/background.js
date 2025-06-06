@@ -203,6 +203,33 @@ async function callGeminiAPI(base64Image, apiKey, targetLanguage, geminiModel = 
   }
 }
 
+// Handle keyboard shortcuts
+chrome.commands.onCommand.addListener((command) => {
+  if (command === 'capture-translate') {
+    // Get the active tab and trigger capture
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (tabs[0]) {
+        // Get stored settings
+        chrome.storage.sync.get(['geminiApiKey', 'targetLanguage', 'geminiModel'], (result) => {
+          if (!result.geminiApiKey) {
+            // Show popup if no API key is set
+            chrome.action.openPopup();
+            return;
+          }
+          
+          // Send message to content script to start capture
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'startCapture',
+            apiKey: result.geminiApiKey,
+            targetLanguage: result.targetLanguage || 'English',
+            geminiModel: result.geminiModel || 'gemini-2.5-flash-preview-05-20'
+          });
+        });
+      }
+    });
+  }
+});
+
 // Handle extension installation
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Gemini Image Translator installed');
