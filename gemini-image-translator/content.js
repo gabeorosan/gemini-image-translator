@@ -1,15 +1,25 @@
 let isCapturing = false;
 let captureOverlay = null;
 let startX, startY, endX, endY;
-let apiKey, targetLanguage;
+let apiKey, targetLanguage, geminiModel;
+
+// Set a flag to indicate content script is loaded
+window.geminiTranslatorLoaded = true;
+console.log('Gemini Image Translator content script loaded');
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'startCapture') {
     apiKey = request.apiKey;
     targetLanguage = request.targetLanguage;
+    geminiModel = request.geminiModel;
     startScreenCapture();
+    sendResponse({success: true});
+  } else if (request.action === 'showTranslation') {
+    showTranslationResult(request.translation, request.imageData);
+    sendResponse({success: true});
   }
+  return true; // Keep message channel open
 });
 
 function startScreenCapture() {
@@ -146,60 +156,25 @@ function endCapture() {
 }
 
 function captureSelectedArea(left, top, width, height) {
-  // Use html2canvas to capture the selected area
-  const script = document.createElement('script');
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-  script.onload = function() {
-    // Remove the overlay temporarily for clean capture
-    const overlay = document.getElementById('gemini-capture-overlay');
-    if (overlay) overlay.style.display = 'none';
+  // Use Chrome's built-in capture API
+  chrome.runtime.sendMessage({
+    action: 'captureVisibleTab',
+    area: {left, top, width, height},
+    apiKey: apiKey,
+    targetLanguage: targetLanguage,
+    geminiModel: geminiModel
+  }, function(response) {
+    if (chrome.runtime.lastError) {
+      showError('Capture failed: ' + chrome.runtime.lastError.message);
+      return;
+    }
     
-    html2canvas(document.body, {
-      x: left,
-      y: top,
-      width: width,
-      height: height,
-      useCORS: true,
-      allowTaint: true,
-      scale: 1
-    }).then(canvas => {
-      const imageData = canvas.toDataURL('image/png');
-      
-      // Send to background script for processing
-      chrome.runtime.sendMessage({
-        action: 'translateImage',
-        imageData: imageData,
-        apiKey: apiKey,
-        targetLanguage: targetLanguage
-      }, function(response) {
-        if (response.success) {
-          showTranslationResult(response.translation, imageData);
-        } else {
-          showError('Translation failed: ' + response.error);
-        }
-      });
-      
-      // Remove the script
-      script.remove();
-    }).catch(error => {
-      console.error('Capture failed:', error);
-      showError('Failed to capture image: ' + error.message);
-      script.remove();
-    });
-  };
-  
-  script.onerror = function() {
-    // Fallback: use Chrome's built-in capture API
-    chrome.runtime.sendMessage({
-      action: 'captureVisibleTab',
-      area: {left, top, width, height},
-      apiKey: apiKey,
-      targetLanguage: targetLanguage
-    });
-    script.remove();
-  };
-  
-  document.head.appendChild(script);
+    if (response && response.success) {
+      // Success handled by background script
+    } else {
+      showError('Capture failed: ' + (response ? response.error : 'Unknown error'));
+    }
+  });
 }
 
 function showTranslationResult(translation, imageData) {

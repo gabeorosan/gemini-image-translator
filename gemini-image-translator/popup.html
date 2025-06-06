@@ -154,6 +154,15 @@
     </select>
   </div>
   
+  <div class="language-section">
+    <label for="geminiModel">Gemini Model:</label>
+    <select id="geminiModel">
+      <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
+      <option value="gemini-1.5-pro">Gemini 1.5 Pro (More Accurate)</option>
+      <option value="gemini-pro-vision">Gemini Pro Vision (Legacy)</option>
+    </select>
+  </div>
+  
   <div class="buttons">
     <button id="captureBtn" class="btn btn-primary">📷 Capture & Translate</button>
     <button id="uploadBtn" class="btn btn-secondary">📁 Upload Image</button>
@@ -165,10 +174,13 @@
   
   <div class="instructions">
     <strong>How to use:</strong><br>
-    1. Enter your Gemini API key<br>
-    2. Select target language<br>
-    3. Click "Capture" to select area or "Upload" for image file<br>
-    4. View translation results
+    1. Get API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: white;">Google AI Studio</a><br>
+    2. Enter your API key above<br>
+    3. Select target language and model<br>
+    4. Click "Capture" to select screen area<br>
+    5. Or "Upload" to select image file<br>
+    <br>
+    <strong>Note:</strong> Refresh page after installing extension
   </div>
   
   <script src="popup.js"></script>

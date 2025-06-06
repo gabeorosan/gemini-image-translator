@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Extension Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .large-text {
+            font-size: 24px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .debug-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Extension Test Page</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Instructions</h2>
+        <ol>
+            <li>Make sure the extension is loaded in Chrome</li>
+            <li>Enter your Gemini API key in the extension popup</li>
+            <li>Select a target language</li>
+            <li>Choose a Gemini model</li>
+            <li>Try capturing the text below</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>🇪🇸 Spanish Text Sample</h2>
+        <div class="large-text">¡Hola! ¿Cómo estás hoy?</div>
+        <p>This is a simple Spanish greeting that should translate to English.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🇫🇷 French Text Sample</h2>
+        <div class="large-text">Bonjour! Comment allez-vous?</div>
+        <p>This is a French greeting that should translate to your selected language.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🇯🇵 Japanese Text Sample</h2>
+        <div class="large-text">こんにちは！元気ですか？</div>
+        <p>This is a Japanese greeting with hiragana characters.</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔧 Debug Information</h2>
+        <div class="debug-info">
+            <div>Page URL: <span id="pageUrl"></span></div>
+            <div>User Agent: <span id="userAgent"></span></div>
+            <div>Extension Status: <span id="extensionStatus">Checking...</span></div>
+            <div>Content Script: <span id="contentScript">Checking...</span></div>
+        </div>
+        
+        <button onclick="testExtension()" style="padding: 10px 20px; margin: 10px 0; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            Test Extension Communication
+        </button>
+        
+        <div id="testResults" style="margin-top: 10px;"></div>
+    </div>
+    
+    <script>
+        // Fill debug info
+        document.getElementById('pageUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        
+        // Check if extension is available
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            document.getElementById('extensionStatus').textContent = 'Available';
+            document.getElementById('extensionStatus').style.color = 'green';
+        } else {
+            document.getElementById('extensionStatus').textContent = 'Not Available';
+            document.getElementById('extensionStatus').style.color = 'red';
+        }
+        
+        // Check content script
+        setTimeout(() => {
+            if (window.geminiTranslatorLoaded) {
+                document.getElementById('contentScript').textContent = 'Loaded';
+                document.getElementById('contentScript').style.color = 'green';
+            } else {
+                document.getElementById('contentScript').textContent = 'Not Loaded';
+                document.getElementById('contentScript').style.color = 'red';
+            }
+        }, 1000);
+        
+        function testExtension() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div style="color: blue;">Testing extension communication...</div>';
+            
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                try {
+                    chrome.runtime.sendMessage({action: 'test'}, function(response) {
+                        if (chrome.runtime.lastError) {
+                            results.innerHTML = '<div style="color: red;">Error: ' + chrome.runtime.lastError.message + '</div>';
+                        } else {
+                            results.innerHTML = '<div style="color: green;">Extension communication successful!</div>';
+                        }
+                    });
+                } catch (error) {
+                    results.innerHTML = '<div style="color: red;">Error: ' + error.message + '</div>';
+                }
+            } else {
+                results.innerHTML = '<div style="color: red;">Chrome extension API not available</div>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,18 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
   const apiKeyInput = document.getElementById('apiKey');
   const targetLanguageSelect = document.getElementById('targetLanguage');
+  const geminiModelSelect = document.getElementById('geminiModel');
   const captureBtn = document.getElementById('captureBtn');
   const uploadBtn = document.getElementById('uploadBtn');
   const fileInput = document.getElementById('fileInput');
   const status = document.getElementById('status');
 
   // Load saved settings
-  chrome.storage.sync.get(['geminiApiKey', 'targetLanguage'], function(result) {
+  chrome.storage.sync.get(['geminiApiKey', 'targetLanguage', 'geminiModel'], function(result) {
     if (result.geminiApiKey) {
       apiKeyInput.value = result.geminiApiKey;
     }
     if (result.targetLanguage) {
       targetLanguageSelect.value = result.targetLanguage;
+    }
+    if (result.geminiModel) {
+      geminiModelSelect.value = result.geminiModel;
     }
   });
 
@@ -26,6 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.sync.set({targetLanguage: targetLanguageSelect.value});
   });
 
+  // Save gemini model when changed
+  geminiModelSelect.addEventListener('change', function() {
+    chrome.storage.sync.set({geminiModel: geminiModelSelect.value});
+  });
+
   // Capture button click
   captureBtn.addEventListener('click', function() {
     if (!apiKeyInput.value.trim()) {
@@ -33,16 +42,28 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    updateStatus('Click and drag to select area to translate...', 'success');
+    updateStatus('Activating capture mode...', 'success');
     
     // Close popup and activate capture mode
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (chrome.runtime.lastError) {
+        updateStatus('Error: ' + chrome.runtime.lastError.message, 'error');
+        return;
+      }
+      
       chrome.tabs.sendMessage(tabs[0].id, {
         action: 'startCapture',
         apiKey: apiKeyInput.value,
-        targetLanguage: targetLanguageSelect.value
+        targetLanguage: targetLanguageSelect.value,
+        geminiModel: geminiModelSelect.value
+      }, function(response) {
+        if (chrome.runtime.lastError) {
+          console.error('Message sending failed:', chrome.runtime.lastError);
+          updateStatus('Failed to activate capture mode. Try refreshing the page.', 'error');
+        } else {
+          window.close();
+        }
       });
-      window.close();
     });
   });
 
@@ -70,12 +91,18 @@ document.addEventListener('DOMContentLoaded', function() {
           action: 'translateImage',
           imageData: imageData,
           apiKey: apiKeyInput.value,
-          targetLanguage: targetLanguageSelect.value
+          targetLanguage: targetLanguageSelect.value,
+          geminiModel: geminiModelSelect.value
         }, function(response) {
-          if (response.success) {
+          if (chrome.runtime.lastError) {
+            updateStatus('Error: ' + chrome.runtime.lastError.message, 'error');
+            return;
+          }
+          
+          if (response && response.success) {
             showTranslationResult(response.translation);
           } else {
-            updateStatus('Error: ' + response.error, 'error');
+            updateStatus('Error: ' + (response ? response.error : 'Unknown error'), 'error');
           }
         });
       };
