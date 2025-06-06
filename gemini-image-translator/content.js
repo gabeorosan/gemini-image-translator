@@ -214,30 +214,25 @@ function captureSelectedArea(left, top, width, height) {
 let translationPosition = null;
 
 function calculateTranslationPosition() {
-  // Check if we have a saved relative position
+  // Check if we have a saved absolute position
   const savedPosition = localStorage.getItem('gemini-translation-position');
-  if (savedPosition && endX && endY) {
+  if (savedPosition) {
     try {
       const saved = JSON.parse(savedPosition);
-      const captureLeft = Math.min(startX, endX) - window.pageXOffset;
-      const captureTop = Math.min(startY, endY) - window.pageYOffset;
       
-      let resultX = captureLeft + saved.relativeX;
-      let resultY = captureTop + saved.relativeY;
-      
-      console.log('Restoring position:', {
-        capturePos: { x: captureLeft, y: captureTop },
-        savedRelative: { x: saved.relativeX, y: saved.relativeY },
-        calculated: { x: resultX, y: resultY }
-      });
+      // Use saved absolute position, but ensure it's within viewport
+      let resultX = saved.x;
+      let resultY = saved.y;
       
       // Ensure it stays within viewport
       resultX = Math.max(10, Math.min(resultX, window.innerWidth - 310));
       resultY = Math.max(10, Math.min(resultY, window.innerHeight - 200));
       
+
+      
       return { x: resultX, y: resultY };
     } catch (e) {
-      console.log('Error parsing saved position:', e);
+
       // Fall back to default positioning if saved position is invalid
     }
   }
@@ -370,15 +365,11 @@ function showTranslationResult(translation, imageData) {
   `;
   
   resultWindow.innerHTML = `
-    <div style="position: absolute; top: -12px; right: -12px; z-index: 10;">
-      <button id="closeResult" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">×</button>
+    <div style="position: absolute; top: 5px; right: 5px;">
+      <button id="closeResult" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px; line-height: 1;">×</button>
     </div>
-    <div style="padding: 15px; line-height: 1.4; color: #333; font-size: 14px;">
+    <div style="padding: 15px; padding-right: 35px; line-height: 1.4; color: #333; font-size: 14px;">
       ${translation.replace(/\n/g, '<br>')}
-    </div>
-    <div style="position: absolute; bottom: -12px; right: -12px; display: flex; gap: 4px;">
-      <button id="copyTranslation" style="background: #4285f4; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Copy</button>
-      <button id="newTranslation" style="background: #34a853; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">New</button>
     </div>
   `;
   
@@ -387,22 +378,6 @@ function showTranslationResult(translation, imageData) {
   // Add event listeners
   document.getElementById('closeResult').addEventListener('click', () => {
     resultWindow.remove();
-  });
-  
-  document.getElementById('copyTranslation').addEventListener('click', () => {
-    navigator.clipboard.writeText(translation).then(() => {
-      const btn = document.getElementById('copyTranslation');
-      const originalText = btn.textContent;
-      btn.textContent = 'Copied!';
-      setTimeout(() => {
-        btn.textContent = originalText;
-      }, 2000);
-    });
-  });
-  
-  document.getElementById('newTranslation').addEventListener('click', () => {
-    resultWindow.remove();
-    startScreenCapture();
   });
   
   // Add drag functionality
@@ -454,31 +429,17 @@ function makeDraggable(element) {
 }
 
 function saveTranslationPosition(element) {
-  if (!endX || !endY) return;
-  
   // Get current element position
   const elementRect = element.getBoundingClientRect();
   const currentX = elementRect.left;
   const currentY = elementRect.top;
   
-  // Get capture area position (in viewport coordinates)
-  const captureLeft = Math.min(startX, endX) - window.pageXOffset;
-  const captureTop = Math.min(startY, endY) - window.pageYOffset;
-  
-  // Calculate relative position
-  const relativeX = currentX - captureLeft;
-  const relativeY = currentY - captureTop;
-  
   const positionData = {
-    relativeX: relativeX,
-    relativeY: relativeY
+    x: currentX,
+    y: currentY
   };
   
-  console.log('Saving position:', {
-    elementPos: { x: currentX, y: currentY },
-    capturePos: { x: captureLeft, y: captureTop },
-    relative: { x: relativeX, y: relativeY }
-  });
+
   
   localStorage.setItem('gemini-translation-position', JSON.stringify(positionData));
 }
