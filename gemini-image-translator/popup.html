@@ -138,25 +138,13 @@
   
   <div class="language-section">
     <label for="targetLanguage">Translate to:</label>
-    <select id="targetLanguage">
-      <option value="English">English</option>
-      <option value="Spanish">Spanish</option>
-      <option value="French">French</option>
-      <option value="German">German</option>
-      <option value="Italian">Italian</option>
-      <option value="Portuguese">Portuguese</option>
-      <option value="Russian">Russian</option>
-      <option value="Japanese">Japanese</option>
-      <option value="Korean">Korean</option>
-      <option value="Chinese">Chinese</option>
-      <option value="Arabic">Arabic</option>
-      <option value="Hindi">Hindi</option>
-    </select>
+    <input type="text" id="targetLanguage" placeholder="Enter any language (e.g., English, Spanish, French...)" value="English">
   </div>
   
   <div class="language-section">
     <label for="geminiModel">Gemini Model:</label>
     <select id="geminiModel">
+      <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash (Latest)</option>
       <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast & Free)</option>
       <option value="gemini-1.5-pro">Gemini 1.5 Pro (More Accurate)</option>
       <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Experimental)</option>
@@ -166,10 +154,7 @@
   
   <div class="buttons">
     <button id="captureBtn" class="btn btn-primary">📷 Capture & Translate</button>
-    <button id="uploadBtn" class="btn btn-secondary">📁 Upload Image</button>
   </div>
-  
-  <input type="file" id="fileInput" accept="image/*" style="display: none;">
   
   <div id="status" class="status">Ready to translate images</div>
   
@@ -179,7 +164,6 @@
     2. Enter your API key above<br>
     3. Select target language and model<br>
     4. Click "Capture" to select screen area<br>
-    5. Or "Upload" to select image file<br>
     <br>
     <strong>Note:</strong> Refresh page after installing extension
   </div>

@@ -205,18 +205,48 @@ function captureSelectedArea(left, top, width, height) {
 }
 
 function showTranslationResult(translation, imageData) {
+  // Calculate position to the side of the captured area
+  let resultX = window.innerWidth - 350; // Default to right side
+  let resultY = 50; // Default top position
+  
+  // If we have capture coordinates, position relative to them
+  if (endX && endY) {
+    const captureRight = Math.max(startX, endX) - window.pageXOffset;
+    const captureTop = Math.min(startY, endY) - window.pageYOffset;
+    
+    // Try to position to the right of the capture area
+    if (captureRight + 320 < window.innerWidth) {
+      resultX = captureRight + 20;
+      resultY = captureTop;
+    } else {
+      // If not enough space on right, try left
+      const captureLeft = Math.min(startX, endX) - window.pageXOffset;
+      if (captureLeft - 320 > 0) {
+        resultX = captureLeft - 320;
+        resultY = captureTop;
+      } else {
+        // If no space on sides, position below
+        resultX = Math.min(startX, endX) - window.pageXOffset;
+        resultY = Math.max(startY, endY) - window.pageYOffset + 20;
+      }
+    }
+    
+    // Ensure it stays within viewport
+    resultX = Math.max(10, Math.min(resultX, window.innerWidth - 310));
+    resultY = Math.max(10, Math.min(resultY, window.innerHeight - 200));
+  }
+  
   // Create a floating result window
   const resultWindow = document.createElement('div');
   resultWindow.style.cssText = `
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: ${resultY}px;
+    left: ${resultX}px;
     background: white;
-    border: 2px solid #4CAF50;
-    border-radius: 10px;
-    padding: 20px;
-    max-width: 500px;
+    border: 2px solid #4285f4;
+    border-radius: 8px;
+    padding: 15px;
+    width: 300px;
     max-height: 400px;
     overflow-y: auto;
     z-index: 1000001;
@@ -225,19 +255,16 @@ function showTranslationResult(translation, imageData) {
   `;
   
   resultWindow.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-      <h3 style="margin: 0; color: #333;">Translation Result</h3>
-      <button id="closeResult" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">×</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h3 style="margin: 0; color: #333; font-size: 16px;">Translation</h3>
+      <button id="closeResult" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 14px;">×</button>
     </div>
-    <div style="margin-bottom: 15px;">
-      <img src="${imageData}" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 5px;">
-    </div>
-    <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; line-height: 1.5;">
+    <div style="background: #f8f9fa; padding: 12px; border-radius: 4px; border-left: 4px solid #4285f4; line-height: 1.4; margin-bottom: 12px;">
       ${translation.replace(/\n/g, '<br>')}
     </div>
-    <div style="margin-top: 15px; text-align: center;">
-      <button id="copyTranslation" style="background: #2196F3; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">Copy Text</button>
-      <button id="newTranslation" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">New Translation</button>
+    <div style="text-align: center;">
+      <button id="copyTranslation" style="background: #4285f4; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px;">Copy</button>
+      <button id="newTranslation" style="background: #34a853; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">New</button>
     </div>
   `;
   
@@ -263,6 +290,13 @@ function showTranslationResult(translation, imageData) {
     resultWindow.remove();
     startScreenCapture();
   });
+  
+  // Auto-remove after 15 seconds
+  setTimeout(() => {
+    if (resultWindow.parentNode) {
+      resultWindow.remove();
+    }
+  }, 15000);
 }
 
 function showError(message) {
