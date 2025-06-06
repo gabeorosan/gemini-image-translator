@@ -225,12 +225,19 @@ function calculateTranslationPosition() {
       let resultX = captureLeft + saved.relativeX;
       let resultY = captureTop + saved.relativeY;
       
+      console.log('Restoring position:', {
+        capturePos: { x: captureLeft, y: captureTop },
+        savedRelative: { x: saved.relativeX, y: saved.relativeY },
+        calculated: { x: resultX, y: resultY }
+      });
+      
       // Ensure it stays within viewport
       resultX = Math.max(10, Math.min(resultX, window.innerWidth - 310));
       resultY = Math.max(10, Math.min(resultY, window.innerHeight - 200));
       
       return { x: resultX, y: resultY };
     } catch (e) {
+      console.log('Error parsing saved position:', e);
       // Fall back to default positioning if saved position is invalid
     }
   }
@@ -363,16 +370,15 @@ function showTranslationResult(translation, imageData) {
   `;
   
   resultWindow.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; cursor: move; user-select: none;">
-      <h3 style="margin: 0; color: #333; font-size: 16px;">Translation <span style="font-size: 12px; color: #666;">(drag to move)</span></h3>
-      <button id="closeResult" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 14px;">×</button>
+    <div style="position: absolute; top: -12px; right: -12px; z-index: 10;">
+      <button id="closeResult" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">×</button>
     </div>
-    <div style="background: #f8f9fa; padding: 12px; border-radius: 4px; border-left: 4px solid #4285f4; line-height: 1.4; margin-bottom: 12px;">
+    <div style="padding: 15px; line-height: 1.4; color: #333; font-size: 14px;">
       ${translation.replace(/\n/g, '<br>')}
     </div>
-    <div style="text-align: center;">
-      <button id="copyTranslation" style="background: #4285f4; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 8px;">Copy</button>
-      <button id="newTranslation" style="background: #34a853; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">New</button>
+    <div style="position: absolute; bottom: -12px; right: -12px; display: flex; gap: 4px;">
+      <button id="copyTranslation" style="background: #4285f4; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Copy</button>
+      <button id="newTranslation" style="background: #34a853; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">New</button>
     </div>
   `;
   
@@ -408,7 +414,7 @@ function makeDraggable(element) {
   let dragOffset = { x: 0, y: 0 };
   
   element.addEventListener('mousedown', function(e) {
-    // Only start dragging if clicking on the header area (not buttons)
+    // Only start dragging if clicking on the main content area (not buttons)
     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
       return;
     }
@@ -450,17 +456,29 @@ function makeDraggable(element) {
 function saveTranslationPosition(element) {
   if (!endX || !endY) return;
   
+  // Get current element position
+  const elementRect = element.getBoundingClientRect();
+  const currentX = elementRect.left;
+  const currentY = elementRect.top;
+  
+  // Get capture area position (in viewport coordinates)
   const captureLeft = Math.min(startX, endX) - window.pageXOffset;
   const captureTop = Math.min(startY, endY) - window.pageYOffset;
   
-  const elementRect = element.getBoundingClientRect();
-  const relativeX = elementRect.left - captureLeft;
-  const relativeY = elementRect.top - captureTop;
+  // Calculate relative position
+  const relativeX = currentX - captureLeft;
+  const relativeY = currentY - captureTop;
   
   const positionData = {
     relativeX: relativeX,
     relativeY: relativeY
   };
+  
+  console.log('Saving position:', {
+    elementPos: { x: currentX, y: currentY },
+    capturePos: { x: captureLeft, y: captureTop },
+    relative: { x: relativeX, y: relativeY }
+  });
   
   localStorage.setItem('gemini-translation-position', JSON.stringify(positionData));
 }
