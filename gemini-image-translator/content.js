@@ -272,8 +272,12 @@ function calculateTranslationPosition() {
 }
 
 function showLoadingIndicator(left, top, width, height) {
-  // Remove any existing loading indicator
+  // Remove any existing loading indicator AND translation result
   hideLoadingIndicator();
+  const existingResult = document.getElementById('gemini-translation-result');
+  if (existingResult) {
+    existingResult.remove();
+  }
   
   // Use the same positioning logic as translation result
   const position = calculateTranslationPosition();
@@ -296,6 +300,7 @@ function showLoadingIndicator(left, top, width, height) {
     justify-content: center;
     font-family: Arial, sans-serif;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    cursor: move;
   `;
   
   loadingOverlay.innerHTML = `
@@ -320,6 +325,9 @@ function showLoadingIndicator(left, top, width, height) {
   }
   
   document.body.appendChild(loadingOverlay);
+  
+  // Make loading indicator draggable
+  makeDraggable(loadingOverlay);
 }
 
 function hideLoadingIndicator() {
@@ -334,12 +342,6 @@ function hideLoadingIndicator() {
 function showTranslationResult(translation, imageData) {
   // Hide loading indicator
   hideLoadingIndicator();
-  
-  // Remove any existing translation result
-  const existingResult = document.getElementById('gemini-translation-result');
-  if (existingResult) {
-    existingResult.remove();
-  }
   
   // Use the same position as the loading indicator
   const position = translationPosition || calculateTranslationPosition();
@@ -378,7 +380,22 @@ function showTranslationResult(translation, imageData) {
   // Add event listeners
   document.getElementById('closeResult').addEventListener('click', () => {
     resultWindow.remove();
+    removeEscapeHandler();
   });
+  
+  // Add escape key handler
+  const escapeHandler = function(e) {
+    if (e.key === 'Escape') {
+      resultWindow.remove();
+      removeEscapeHandler();
+    }
+  };
+  
+  const removeEscapeHandler = function() {
+    document.removeEventListener('keydown', escapeHandler);
+  };
+  
+  document.addEventListener('keydown', escapeHandler);
   
   // Add drag functionality
   makeDraggable(resultWindow);
@@ -388,7 +405,7 @@ function makeDraggable(element) {
   let isDragging = false;
   let dragOffset = { x: 0, y: 0 };
   
-  element.addEventListener('mousedown', function(e) {
+  const mouseDownHandler = function(e) {
     // Only start dragging if clicking on the main content area (not buttons)
     if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
       return;
@@ -401,9 +418,9 @@ function makeDraggable(element) {
     
     element.style.cursor = 'grabbing';
     e.preventDefault();
-  });
+  };
   
-  document.addEventListener('mousemove', function(e) {
+  const mouseMoveHandler = function(e) {
     if (!isDragging) return;
     
     let newX = e.clientX - dragOffset.x;
@@ -415,17 +432,32 @@ function makeDraggable(element) {
     
     element.style.left = newX + 'px';
     element.style.top = newY + 'px';
-  });
+  };
   
-  document.addEventListener('mouseup', function(e) {
+  const mouseUpHandler = function(e) {
     if (isDragging) {
       isDragging = false;
       element.style.cursor = 'move';
       
-      // Save the new relative position
+      // Save the new position (works for both loading and translation boxes)
       saveTranslationPosition(element);
+      
+      // Update the stored position for consistency
+      const rect = element.getBoundingClientRect();
+      translationPosition = { x: rect.left, y: rect.top };
     }
-  });
+  };
+  
+  element.addEventListener('mousedown', mouseDownHandler);
+  document.addEventListener('mousemove', mouseMoveHandler);
+  document.addEventListener('mouseup', mouseUpHandler);
+  
+  // Store references to remove listeners later if needed
+  element._dragHandlers = {
+    mouseDown: mouseDownHandler,
+    mouseMove: mouseMoveHandler,
+    mouseUp: mouseUpHandler
+  };
 }
 
 function saveTranslationPosition(element) {
