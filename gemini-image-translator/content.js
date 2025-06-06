@@ -166,7 +166,7 @@ function endCapture() {
 }
 
 function captureSelectedArea(left, top, width, height) {
-  // Show loading indicator
+  // Show loading indicator where translation will appear
   showLoadingIndicator(left, top, width, height);
   
   // Account for device pixel ratio
@@ -194,7 +194,7 @@ function captureSelectedArea(left, top, width, height) {
     targetLanguage: targetLanguage,
     geminiModel: geminiModel
   }, function(response) {
-    // Hide loading indicator
+    // Hide loading indicator (but keep captured area indicator until translation shows)
     hideLoadingIndicator();
     
     if (chrome.runtime.lastError) {
@@ -214,28 +214,61 @@ function showLoadingIndicator(left, top, width, height) {
   // Remove any existing loading indicator
   hideLoadingIndicator();
   
+  // Calculate where the translation result will appear (same logic as showTranslationResult)
+  let resultX = window.innerWidth - 350; // Default to right side
+  let resultY = 50; // Default top position
+  
+  // If we have capture coordinates, position relative to them
+  if (endX && endY) {
+    const captureRight = Math.max(startX, endX) - window.pageXOffset;
+    const captureTop = Math.min(startY, endY) - window.pageYOffset;
+    
+    // Try to position to the right of the capture area
+    if (captureRight + 320 < window.innerWidth) {
+      resultX = captureRight + 20;
+      resultY = captureTop;
+    } else {
+      // If not enough space on right, try left
+      const captureLeft = Math.min(startX, endX) - window.pageXOffset;
+      if (captureLeft - 320 > 0) {
+        resultX = captureLeft - 320;
+        resultY = captureTop;
+      } else {
+        // If no space on sides, position below
+        resultX = Math.min(startX, endX) - window.pageXOffset;
+        resultY = Math.max(startY, endY) - window.pageYOffset + 20;
+      }
+    }
+    
+    // Ensure it stays within viewport
+    resultX = Math.max(10, Math.min(resultX, window.innerWidth - 310));
+    resultY = Math.max(10, Math.min(resultY, window.innerHeight - 200));
+  }
+  
   const loadingOverlay = document.createElement('div');
   loadingOverlay.id = 'gemini-loading-indicator';
   loadingOverlay.style.cssText = `
     position: fixed;
-    top: ${top}px;
-    left: ${left}px;
-    width: ${width}px;
-    height: ${height}px;
-    background: rgba(66, 133, 244, 0.2);
+    top: ${resultY}px;
+    left: ${resultX}px;
+    width: 300px;
+    height: 120px;
+    background: white;
     border: 2px solid #4285f4;
-    border-radius: 4px;
+    border-radius: 8px;
     z-index: 1000000;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: Arial, sans-serif;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   `;
   
   loadingOverlay.innerHTML = `
-    <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); text-align: center;">
-      <div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #4285f4; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px;"></div>
-      <div style="color: #333; font-size: 14px; font-weight: 500;">Translating...</div>
+    <div style="text-align: center;">
+      <div style="display: inline-block; width: 24px; height: 24px; border: 3px solid #f3f3f3; border-top: 3px solid #4285f4; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+      <div style="color: #333; font-size: 14px; font-weight: 500; margin-bottom: 4px;">Translating...</div>
+      <div style="color: #666; font-size: 12px;">Please wait while we process your image</div>
     </div>
   `;
   
@@ -261,6 +294,8 @@ function hideLoadingIndicator() {
     loadingIndicator.remove();
   }
 }
+
+
 
 function showTranslationResult(translation, imageData) {
   // Hide loading indicator

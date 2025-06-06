@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const targetLanguageInput = document.getElementById('targetLanguage');
   const geminiModelSelect = document.getElementById('geminiModel');
   const captureBtn = document.getElementById('captureBtn');
+  const customShortcutInput = document.getElementById('customShortcut');
+  const changeShortcutBtn = document.getElementById('changeShortcut');
 
   const status = document.getElementById('status');
 
@@ -32,6 +34,23 @@ document.addEventListener('DOMContentLoaded', function() {
   // Save gemini model when changed
   geminiModelSelect.addEventListener('change', function() {
     chrome.storage.sync.set({geminiModel: geminiModelSelect.value});
+  });
+
+  // Load current shortcut
+  chrome.commands.getAll(function(commands) {
+    const captureCommand = commands.find(cmd => cmd.name === 'capture-translate');
+    if (captureCommand && captureCommand.shortcut) {
+      customShortcutInput.value = captureCommand.shortcut;
+    } else {
+      customShortcutInput.value = 'Not set';
+    }
+  });
+
+  // Handle shortcut change
+  changeShortcutBtn.addEventListener('click', function() {
+    chrome.tabs.create({
+      url: 'chrome://extensions/shortcuts'
+    });
   });
 
   // Capture button click

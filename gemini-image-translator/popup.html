@@ -152,6 +152,17 @@
     </select>
   </div>
   
+  <div class="language-section">
+    <label for="customShortcut">Keyboard Shortcut:</label>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <input type="text" id="customShortcut" placeholder="e.g., Ctrl+Shift+Y" readonly style="flex: 1; cursor: pointer;">
+      <button id="changeShortcut" style="background: #4285f4; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Change</button>
+    </div>
+    <div style="font-size: 11px; color: #666; margin-top: 4px;">
+      Click "Change" to customize your shortcut in Chrome settings
+    </div>
+  </div>
+  
   <div class="buttons">
     <button id="captureBtn" class="btn btn-primary">📷 Capture & Translate</button>
   </div>
@@ -163,9 +174,9 @@
     1. Get API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: white;">Google AI Studio</a><br>
     2. Enter your API key above<br>
     3. Type target language and select model<br>
-    4. Click "Capture" or press <strong>Ctrl+Shift+T</strong><br>
+    4. Click "Capture" or use your custom shortcut<br>
     <br>
-    <strong>Shortcut:</strong> Ctrl+Shift+T (Cmd+Shift+T on Mac)<br>
+    <strong>Default Shortcut:</strong> Ctrl+Shift+Y (Cmd+Shift+Y on Mac)<br>
     <strong>Note:</strong> Refresh page after installing extension
   </div>
   
