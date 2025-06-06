@@ -210,11 +210,32 @@ function captureSelectedArea(left, top, width, height) {
   });
 }
 
-function showLoadingIndicator(left, top, width, height) {
-  // Remove any existing loading indicator
-  hideLoadingIndicator();
+// Store translation position for consistency and memory
+let translationPosition = null;
+
+function calculateTranslationPosition() {
+  // Check if we have a saved relative position
+  const savedPosition = localStorage.getItem('gemini-translation-position');
+  if (savedPosition && endX && endY) {
+    try {
+      const saved = JSON.parse(savedPosition);
+      const captureLeft = Math.min(startX, endX) - window.pageXOffset;
+      const captureTop = Math.min(startY, endY) - window.pageYOffset;
+      
+      let resultX = captureLeft + saved.relativeX;
+      let resultY = captureTop + saved.relativeY;
+      
+      // Ensure it stays within viewport
+      resultX = Math.max(10, Math.min(resultX, window.innerWidth - 310));
+      resultY = Math.max(10, Math.min(resultY, window.innerHeight - 200));
+      
+      return { x: resultX, y: resultY };
+    } catch (e) {
+      // Fall back to default positioning if saved position is invalid
+    }
+  }
   
-  // Calculate where the translation result will appear (same logic as showTranslationResult)
+  // Default positioning logic
   let resultX = window.innerWidth - 350; // Default to right side
   let resultY = 50; // Default top position
   
@@ -245,12 +266,23 @@ function showLoadingIndicator(left, top, width, height) {
     resultY = Math.max(10, Math.min(resultY, window.innerHeight - 200));
   }
   
+  return { x: resultX, y: resultY };
+}
+
+function showLoadingIndicator(left, top, width, height) {
+  // Remove any existing loading indicator
+  hideLoadingIndicator();
+  
+  // Use the same positioning logic as translation result
+  const position = calculateTranslationPosition();
+  translationPosition = position;
+  
   const loadingOverlay = document.createElement('div');
   loadingOverlay.id = 'gemini-loading-indicator';
   loadingOverlay.style.cssText = `
     position: fixed;
-    top: ${resultY}px;
-    left: ${resultX}px;
+    top: ${position.y}px;
+    left: ${position.x}px;
     width: 300px;
     height: 120px;
     background: white;
@@ -301,43 +333,22 @@ function showTranslationResult(translation, imageData) {
   // Hide loading indicator
   hideLoadingIndicator();
   
-  // Calculate position to the side of the captured area
-  let resultX = window.innerWidth - 350; // Default to right side
-  let resultY = 50; // Default top position
-  
-  // If we have capture coordinates, position relative to them
-  if (endX && endY) {
-    const captureRight = Math.max(startX, endX) - window.pageXOffset;
-    const captureTop = Math.min(startY, endY) - window.pageYOffset;
-    
-    // Try to position to the right of the capture area
-    if (captureRight + 320 < window.innerWidth) {
-      resultX = captureRight + 20;
-      resultY = captureTop;
-    } else {
-      // If not enough space on right, try left
-      const captureLeft = Math.min(startX, endX) - window.pageXOffset;
-      if (captureLeft - 320 > 0) {
-        resultX = captureLeft - 320;
-        resultY = captureTop;
-      } else {
-        // If no space on sides, position below
-        resultX = Math.min(startX, endX) - window.pageXOffset;
-        resultY = Math.max(startY, endY) - window.pageYOffset + 20;
-      }
-    }
-    
-    // Ensure it stays within viewport
-    resultX = Math.max(10, Math.min(resultX, window.innerWidth - 310));
-    resultY = Math.max(10, Math.min(resultY, window.innerHeight - 200));
+  // Remove any existing translation result
+  const existingResult = document.getElementById('gemini-translation-result');
+  if (existingResult) {
+    existingResult.remove();
   }
+  
+  // Use the same position as the loading indicator
+  const position = translationPosition || calculateTranslationPosition();
   
   // Create a floating result window
   const resultWindow = document.createElement('div');
+  resultWindow.id = 'gemini-translation-result';
   resultWindow.style.cssText = `
     position: fixed;
-    top: ${resultY}px;
-    left: ${resultX}px;
+    top: ${position.y}px;
+    left: ${position.x}px;
     background: white;
     border: 2px solid #4285f4;
     border-radius: 8px;
@@ -348,11 +359,12 @@ function showTranslationResult(translation, imageData) {
     z-index: 1000001;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     font-family: Arial, sans-serif;
+    cursor: move;
   `;
   
   resultWindow.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <h3 style="margin: 0; color: #333; font-size: 16px;">Translation</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; cursor: move; user-select: none;">
+      <h3 style="margin: 0; color: #333; font-size: 16px;">Translation <span style="font-size: 12px; color: #666;">(drag to move)</span></h3>
       <button id="closeResult" style="background: #f44336; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 14px;">×</button>
     </div>
     <div style="background: #f8f9fa; padding: 12px; border-radius: 4px; border-left: 4px solid #4285f4; line-height: 1.4; margin-bottom: 12px;">
@@ -387,12 +399,70 @@ function showTranslationResult(translation, imageData) {
     startScreenCapture();
   });
   
-  // Auto-remove after 15 seconds
-  setTimeout(() => {
-    if (resultWindow.parentNode) {
-      resultWindow.remove();
+  // Add drag functionality
+  makeDraggable(resultWindow);
+}
+
+function makeDraggable(element) {
+  let isDragging = false;
+  let dragOffset = { x: 0, y: 0 };
+  
+  element.addEventListener('mousedown', function(e) {
+    // Only start dragging if clicking on the header area (not buttons)
+    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+      return;
     }
-  }, 15000);
+    
+    isDragging = true;
+    const rect = element.getBoundingClientRect();
+    dragOffset.x = e.clientX - rect.left;
+    dragOffset.y = e.clientY - rect.top;
+    
+    element.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    
+    let newX = e.clientX - dragOffset.x;
+    let newY = e.clientY - dragOffset.y;
+    
+    // Keep within viewport bounds
+    newX = Math.max(0, Math.min(newX, window.innerWidth - element.offsetWidth));
+    newY = Math.max(0, Math.min(newY, window.innerHeight - element.offsetHeight));
+    
+    element.style.left = newX + 'px';
+    element.style.top = newY + 'px';
+  });
+  
+  document.addEventListener('mouseup', function(e) {
+    if (isDragging) {
+      isDragging = false;
+      element.style.cursor = 'move';
+      
+      // Save the new relative position
+      saveTranslationPosition(element);
+    }
+  });
+}
+
+function saveTranslationPosition(element) {
+  if (!endX || !endY) return;
+  
+  const captureLeft = Math.min(startX, endX) - window.pageXOffset;
+  const captureTop = Math.min(startY, endY) - window.pageYOffset;
+  
+  const elementRect = element.getBoundingClientRect();
+  const relativeX = elementRect.left - captureLeft;
+  const relativeY = elementRect.top - captureTop;
+  
+  const positionData = {
+    relativeX: relativeX,
+    relativeY: relativeY
+  };
+  
+  localStorage.setItem('gemini-translation-position', JSON.stringify(positionData));
 }
 
 function showError(message) {
