@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Retry on API error**: When translation fails, a "Try again with…" modal lets you select a new model and/or enter a new API key (e.g. for quota issues)
 - Dynamic model loading from Gemini API
 - Model refresh functionality
 - Escape key support for closing translations
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Clean replacement logic for multiple translations
 
 ### Changed
+- **Stricter output format**: Improved prompt and post-processing to avoid spaces between characters, random newlines, and markdown in translation results
 - Default model changed to `gemini-2.0-flash`
 - Simplified translation box UI (removed extra buttons)
 - Improved position memory accuracy

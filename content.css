@@ -1,6 +1,16 @@
 /* Gemini Image Translator Content Styles */
 
+/* ===== Capture Overlay ===== */
 #gemini-capture-overlay {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 2147483646 !important;
+  cursor: crosshair;
+  pointer-events: all;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -8,44 +18,291 @@
   box-sizing: border-box;
 }
 
+#gemini-capture-instructions {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 2147483647 !important;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 #gemini-selection-rect {
+  position: fixed !important;
+  border: 2px solid #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+  z-index: 2147483647 !important;
+  pointer-events: none;
   transition: none !important;
   animation: none !important;
 }
 
-/* Ensure overlay is above everything */
-#gemini-capture-overlay,
-#gemini-selection-rect {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-}
-
-/* Style for translation result window */
-.gemini-result-window {
+/* ===== Loading Indicator ===== */
+#gemini-loading-indicator {
+  position: fixed;
+  width: 300px;
+  background: #fff;
+  border: 2px solid #4285f4;
+  border-radius: 12px;
+  z-index: 10000 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  cursor: move;
 }
 
-.gemini-result-window h3 {
-  font-weight: 600;
-  font-size: 18px;
+#gemini-loading-indicator .gemini-spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #e8eaed;
+  border-top-color: #4285f4;
+  border-radius: 50%;
+  animation: gemini-spin 0.8s linear infinite;
+  margin-bottom: 12px;
 }
 
-.gemini-result-window button {
-  font-family: inherit;
+#gemini-loading-indicator .gemini-loading-title {
+  color: #202124;
   font-size: 14px;
   font-weight: 500;
-  transition: background-color 0.2s ease;
+  margin-bottom: 4px;
 }
 
-.gemini-result-window button:hover {
-  opacity: 0.9;
+#gemini-loading-indicator .gemini-loading-subtitle {
+  color: #5f6368;
+  font-size: 12px;
 }
 
-/* Error notification styles */
+@keyframes gemini-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== Translation Result ===== */
+/* Use modest z-index so dictionary extensions' popups (typically 2147483647) can appear on top when hovering over words */
+#gemini-translation-result {
+  position: fixed;
+  background: #fff;
+  border: 2px solid #4285f4;
+  border-radius: 12px;
+  width: 500px;
+  max-height: 420px;
+  z-index: 10000 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: move;
+  display: flex;
+  flex-direction: column;
+}
+
+#gemini-translation-result .gemini-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8eaed;
+  flex-shrink: 0;
+}
+
+#gemini-translation-result .gemini-result-header span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4285f4;
+  letter-spacing: 0.3px;
+}
+
+#gemini-translation-result .gemini-result-actions {
+  display: flex;
+  gap: 6px;
+}
+
+#gemini-translation-result .gemini-result-actions button {
+  background: none;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6368;
+  transition: background 0.15s, color 0.15s;
+}
+
+#gemini-translation-result .gemini-result-actions button:hover {
+  background: #f1f3f4;
+  color: #202124;
+}
+
+#gemini-translation-result .gemini-result-actions .gemini-close-btn:hover {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+#gemini-translation-result .gemini-result-body {
+  padding: 14px 16px;
+  line-height: 1.6;
+  color: #202124;
+  font-size: 24px;
+  overflow-y: auto;
+  flex: 1;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* ===== Error Notification ===== */
 .gemini-error-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #d93025;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 8px;
+  z-index: 10000 !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.4;
+  max-width: 340px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: gemini-slide-in 0.25s ease-out;
+}
+
+@keyframes gemini-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Retry Modal ===== */
+#gemini-retry-modal {
+  position: fixed;
+  background: #fff;
+  border: 2px solid #d93025;
+  border-radius: 12px;
+  width: 420px;
+  z-index: 10000 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: move;
+  display: flex;
+  flex-direction: column;
+}
+
+#gemini-retry-modal .gemini-retry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8eaed;
+  flex-shrink: 0;
+}
+
+#gemini-retry-modal .gemini-retry-header span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #d93025;
+}
+
+#gemini-retry-modal .gemini-retry-close {
+  background: none;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #5f6368;
+}
+
+#gemini-retry-modal .gemini-retry-close:hover {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+#gemini-retry-modal .gemini-retry-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#gemini-retry-modal .gemini-retry-error {
+  font-size: 12px;
+  color: #c5221f;
+  background: #fce8e6;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+#gemini-retry-modal .gemini-retry-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5f6368;
+}
+
+#gemini-retry-modal .gemini-retry-input,
+#gemini-retry-modal .gemini-retry-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#gemini-retry-modal .gemini-retry-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+#gemini-retry-modal .gemini-retry-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #dadce0;
+  background: #fff;
+  color: #5f6368;
+}
+
+#gemini-retry-modal .gemini-retry-btn:hover {
+  background: #f1f3f4;
+}
+
+#gemini-retry-modal .gemini-retry-submit {
+  background: #1a73e8;
+  color: #fff;
+  border-color: #1a73e8;
+}
+
+#gemini-retry-modal .gemini-retry-submit:hover {
+  background: #1565c0;
+}
+
+#gemini-retry-modal .gemini-retry-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -1,184 +1,223 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <style>
-    body {
-      width: 350px;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
     }
-    
+
+    body {
+      width: 360px;
+      padding: 24px;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #4a1a8a 0%, #1a237e 50%, #0d47a1 100%);
+      color: #fff;
+    }
+
     .header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
-    
+
     .header h1 {
-      margin: 0;
-      font-size: 18px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
       font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      opacity: 0.85;
     }
-    
-    .api-key-section {
-      margin-bottom: 20px;
-    }
-    
-    .api-key-section label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 12px;
-      opacity: 0.9;
-    }
-    
-    .api-key-section input {
+
+    input[type="password"],
+    input[type="text"],
+    select {
       width: 100%;
-      padding: 8px;
-      border: none;
-      border-radius: 4px;
-      font-size: 12px;
-      box-sizing: border-box;
+      padding: 9px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1a1a2e;
+      outline: none;
+      transition: border-color 0.2s;
     }
-    
-    .language-section {
-      margin-bottom: 20px;
+
+    input:focus,
+    select:focus {
+      border-color: rgba(255, 255, 255, 0.6);
     }
-    
-    .language-section label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 12px;
-      opacity: 0.9;
-    }
-    
-    .language-section select {
-      width: 100%;
-      padding: 8px;
-      border: none;
-      border-radius: 4px;
-      font-size: 12px;
-      box-sizing: border-box;
-    }
-    
-    .buttons {
+
+    .row {
       display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+      align-items: center;
+      gap: 8px;
     }
-    
-    .btn {
+
+    .row>input,
+    .row>select {
       flex: 1;
-      padding: 10px;
-      border: none;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 8px 12px;
       border-radius: 6px;
       cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .hint {
       font-size: 12px;
-      font-weight: 500;
-      transition: all 0.2s;
+      opacity: 0.65;
+      margin-top: 4px;
     }
-    
-    .btn-primary {
-      background: #4CAF50;
-      color: white;
+
+    .capture-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #43a047, #2e7d32);
+      transition: transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      margin-bottom: 12px;
     }
-    
-    .btn-primary:hover {
-      background: #45a049;
+
+    .capture-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     }
-    
-    .btn-secondary {
-      background: #2196F3;
-      color: white;
+
+    .capture-btn:active {
+      transform: translateY(0);
     }
-    
-    .btn-secondary:hover {
-      background: #1976D2;
-    }
-    
-    .status {
+
+    #status {
       text-align: center;
-      font-size: 11px;
-      opacity: 0.8;
-      margin-top: 10px;
+      font-size: 12px;
+      min-height: 16px;
+      opacity: 0.85;
+      transition: opacity 0.2s;
     }
-    
+
+    #status.error {
+      color: #ff8a80;
+    }
+
+    #status.success {
+      color: #b9f6ca;
+    }
+
     .instructions {
-      font-size: 11px;
-      opacity: 0.8;
-      line-height: 1.4;
-      margin-top: 15px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
+      font-size: 12px;
+      opacity: 0.75;
+      line-height: 1.5;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      margin-top: 12px;
     }
-    
-    .error {
-      color: #ffcdd2;
-      background: rgba(244, 67, 54, 0.2);
+
+    .instructions a {
+      color: #b3e5fc;
+      text-decoration: none;
     }
-    
-    .success {
-      color: #c8e6c9;
-      background: rgba(76, 175, 80, 0.2);
+
+    .instructions a:hover {
+      text-decoration: underline;
+    }
+
+    .instructions strong {
+      opacity: 1;
     }
   </style>
 </head>
+
 <body>
   <div class="header">
     <h1>🌐 Gemini Image Translator</h1>
   </div>
-  
-  <div class="api-key-section">
-    <label for="apiKey">Gemini API Key:</label>
+
+  <div class="card">
+    <label for="apiKey">Gemini API Key</label>
     <input type="password" id="apiKey" placeholder="Enter your Gemini API key">
   </div>
-  
-  <div class="language-section">
-    <label for="targetLanguage">Translate to:</label>
-    <input type="text" id="targetLanguage" placeholder="Enter any language (e.g., English, Spanish, French...)" value="English">
+
+  <div class="card">
+    <label for="targetLanguage">Translate To</label>
+    <input type="text" id="targetLanguage" placeholder="e.g. English, Spanish, Japanese…" value="English">
   </div>
-  
-  <div class="language-section">
-    <label for="geminiModel">Gemini Model:</label>
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <select id="geminiModel" style="flex: 1;">
-        <option value="gemini-2.0-flash">Loading models...</option>
+
+  <div class="card">
+    <label for="geminiModel">Model</label>
+    <div class="row">
+      <select id="geminiModel">
+        <option value="gemini-3.0-flash-preview">Loading models…</option>
       </select>
-      <button id="refreshModels" style="background: #34a853; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;" title="Refresh available models">↻</button>
+      <button id="refreshModels" class="icon-btn" title="Refresh available models">↻</button>
     </div>
   </div>
-  
-  <div class="language-section">
-    <label for="customShortcut">Keyboard Shortcut:</label>
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <input type="text" id="customShortcut" placeholder="e.g., Ctrl+Shift+Y" readonly style="flex: 1; cursor: pointer;">
-      <button id="changeShortcut" style="background: #4285f4; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">Change</button>
+
+  <div class="card">
+    <label for="customShortcut">Keyboard Shortcut</label>
+    <div class="row">
+      <input type="text" id="customShortcut" placeholder="Not set" readonly style="cursor:pointer;">
+      <button id="changeShortcut" class="icon-btn">Change</button>
     </div>
-    <div style="font-size: 11px; color: #666; margin-top: 4px;">
-      Click "Change" to customize your shortcut in Chrome settings
-    </div>
+    <div class="hint">Opens Chrome settings to customize</div>
   </div>
-  
-  <div class="buttons">
-    <button id="captureBtn" class="btn btn-primary">📷 Capture & Translate</button>
-  </div>
-  
-  <div id="status" class="status">Ready to translate images</div>
-  
+
+  <button id="captureBtn" class="capture-btn">📷 Capture & Translate</button>
+
+  <div id="status">Ready</div>
+
   <div class="instructions">
-    <strong>How to use:</strong><br>
-    1. Get API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: white;">Google AI Studio</a><br>
-    2. Enter your API key above<br>
-    3. Type target language and select model<br>
-    4. Click "Capture" or use your custom shortcut<br>
-    <br>
-    <strong>Default Shortcut:</strong> Ctrl+Shift+Y (Cmd+Shift+Y on Mac)<br>
-    <strong>Note:</strong> Refresh page after installing extension
+    <strong>Quick Start</strong><br>
+    1. Get a key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a><br>
+    2. Enter key above, pick a language & model<br>
+    3. Press <strong>Ctrl+Shift+L</strong> (Cmd+Shift+L on Mac) or click Capture<br>
+    4. Drag to select an area — translation appears instantly
   </div>
-  
+
   <script src="popup.js"></script>
 </body>
+
 </html>
